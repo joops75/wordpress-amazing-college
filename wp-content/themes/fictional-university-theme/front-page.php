@@ -38,7 +38,7 @@
                 wp_reset_postdata();
             ?>
             
-            <p class="t-center no-margin"><a href="#" class="btn btn--blue">View All Events</a></p>
+            <p class="t-center no-margin"><a href="<?php echo get_post_type_archive_link( 'event' ); ?>" class="btn btn--blue">View All Events</a></p>
 
         </div>
     </div>
@@ -65,7 +65,7 @@
                 wp_reset_postdata();
             ?>
             
-            <p class="t-center no-margin"><a href="<?php echo site_url( '/blog' ); ?>" class="btn btn--yellow">View All Blog Posts</a></p>
+            <p class="t-center no-margin"><a href="<?php echo get_post_type_archive_link( 'post' ); ?>" class="btn btn--yellow">View All Blog Posts</a></p>
         </div>
     </div>
 </div>

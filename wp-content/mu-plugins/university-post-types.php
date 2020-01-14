@@ -1,8 +1,10 @@
 <?php
 
 function university_post_types() {
+    // re-save permalink options in admin area to 'activate' any new custom post type permalink settings and avoid 404 errors
+
+    // Event Post Type
     register_post_type( 'event', array(
-        // re-save permalink options in admin area to 'activate' any new custom post type permalink settings and avoid 404 errors
         'rewrite' => array( 'slug' => 'events' ),
         'has_archive' => true,
         'public' => true,
@@ -15,6 +17,22 @@ function university_post_types() {
         ),
         'menu_icon' => 'dashicons-calendar',
         'supports' => array( 'title', 'editor', 'excerpt' )
+    ) );
+
+    // Program Post Type
+    register_post_type( 'program', array(
+        'rewrite' => array( 'slug' => 'programs' ),
+        'has_archive' => true,
+        'public' => true,
+        'labels' => array(
+            'name' => 'Programs',
+            'singular_name' => 'Program',
+            'add_new_item' => 'Add New Program',
+            'edit_item' => 'Edit Program',
+            'all_items' => 'All Programs'
+        ),
+        'menu_icon' => 'dashicons-awards',
+        'supports' => array( 'title', 'editor' )
     ) );
 }
 

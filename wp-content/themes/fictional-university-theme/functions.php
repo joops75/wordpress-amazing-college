@@ -20,6 +20,7 @@ function university_features() {
 add_action('after_setup_theme', 'university_features');
 
 function university_adjust_queries($query) {
+    // Event query
     if( $query->is_main_query() and !is_admin() and is_post_type_archive( 'event' ) ) {
         // default wp query (not custom), not in admin area, on 'event' archive page
         $today = date('Ymd'); // ensure date format returned from backend for 'event_date' custom field is also 'Ymd'
@@ -34,6 +35,14 @@ function university_adjust_queries($query) {
                 'type' => 'numeric' // not strictly necessary here
             )
         ));
+    }
+    
+    // Program query
+    if( $query->is_main_query() and !is_admin() and is_post_type_archive( 'program' ) ) {
+        // default wp query (not custom), not in admin area, on 'program' archive page
+        $query->set('orderby', 'title');
+        $query->set('order', 'ASC');
+        $query->set('posts_per_page', -1); // display all posts
     }
 }
 

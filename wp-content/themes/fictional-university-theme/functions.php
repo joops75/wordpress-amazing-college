@@ -18,3 +18,23 @@ function university_features() {
 }
 
 add_action('after_setup_theme', 'university_features');
+
+function university_adjust_queries($query) {
+    if( $query->is_main_query() and !is_admin() and is_post_type_archive( 'event' ) ) {
+        // default wp query (not custom), not in admin area, on 'event' archive page
+        $today = date('Ymd'); // ensure date format returned from backend for 'event_date' custom field is also 'Ymd'
+        $query->set('meta_key', 'event_date');
+        $query->set('orderby', 'meta_value_num');
+        $query->set('order', 'ASC');
+        $query->set('meta_query', array(
+            array(
+                'key' => 'event_date',
+                'compare' => '>=',
+                'value' => $today,
+                'type' => 'numeric' // not strictly necessary here
+            )
+        ));
+    }
+}
+
+add_action( 'pre_get_posts', 'university_adjust_queries' );

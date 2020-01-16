@@ -22,6 +22,46 @@
         </div>
         
         <?php
+            $relatedProfessors = new WP_Query( array(
+                'post_type' => 'professor',
+                'posts_per_page' => -1,
+                'orderby' => 'title',
+                'order' => 'ASC',
+                'meta_query' => array(
+                    array(
+                        'key' => 'related_programs', // returns a stringified array from the database
+                        'compare' => 'LIKE', // 'LIKE' means 'contains'
+                        'value' => '"' . get_the_ID() . '"' // match value must contain "" for correct matching with stringified array
+                    )
+                )
+            ) );
+        ?>
+
+        <?php if( $relatedProfessors->have_posts() ) : ?>
+
+            <hr class="section-break">
+
+            <h2 class="headline headline--medium"><?php the_title(); ?> Professors</h2>
+
+            <ul class="professor-cards">
+
+        <?php
+            while( $relatedProfessors->have_posts() ) : $relatedProfessors->the_post();
+        ?>
+                <li class="professor-card__list-item">
+                    <a class="professor-card" href="<?php the_permalink(); ?>">
+                        <img src="<?php the_post_thumbnail_url('professor-landscape'); ?>" class="professor-card__image">
+                        <span class="professor-card__name"><?php the_title(); ?></span>
+                    </a>
+                </li>
+        <?php
+            endwhile;
+            wp_reset_postdata();
+        ?>
+            </ul>
+        <?php endif; ?>
+        
+        <?php
             $today = date('Ymd'); // ensure date format returned from backend for 'event_date' custom field is also 'Ymd'
             $eventPosts = new WP_Query( array(
                 'post_type' => 'event',

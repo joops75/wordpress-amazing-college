@@ -40,15 +40,16 @@ function universitySearchResults($data) {
     }
 
     $programRelationshipQuery = new WP_Query( array(
-        'post_type' => 'professor',
+        'post_type' => array( 'professor', 'event' ),
         'meta_query' => $programMetaQuery
     ) );
 
     while( $programRelationshipQuery->have_posts() ) {
         $programRelationshipQuery->the_post();
         $postType = get_post_type();
+        $eventDate = new DateTime( get_field( 'event_date' ) );
         if( !$results[$postType] ) $results[$postType] = array();
-        array_push($results[$postType], infoArr($postType, null));
+        array_push($results[$postType], infoArr($postType, $eventDate));
         // remove duplicate results
         $results[$postType] = array_unique( $results[$postType], SORT_REGULAR );
     }

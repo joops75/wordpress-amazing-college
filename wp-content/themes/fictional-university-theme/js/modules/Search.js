@@ -84,33 +84,78 @@ class Search {
 
     getResults() {
         // 'universityData' passed in through a script tag via functions.php
-        $
-            .when(...this.getPostTypes.map(postType => $.getJSON(`${universityData.root_url}/wp-json/wp/v2/${postType}?search=${this.searchValue}`)))
-            .then((...data) => {
+        $.getJSON(`${universityData.root_url}/wp-json/university/v1/search?term=${this.searchValue}`)
+            .then(results => {
                 this.isSpinnerVisible = false;
-                const combinedData = data.reduce((a, b) => {
-                    a.push(...b[0]);
-                    return a;
-                }, []);
+                const postTypes = Object.keys(results);
                 this.resultsOutput.html(`
-                    ${combinedData.length
+                    ${postTypes.length
                         ?
                         `
                         <h2 class="search-overlay__section-title">Search results for "${this.searchValue}":</h2>
-                        <ul class="link-list min-list">
-                            ${combinedData.map(post => `<li><a href="${post.link}">${post.title.rendered}</a></li>`).join('')}
-                        </ul>
+                            ${postTypes.map((postType, i) => {
+                                return (
+                                    `
+                                    ${i % 3 === 0 ? `<div class="row">` : ''}
+                                    <div class="one-third">
+                                        <h2 class="search-overlay__section-title">${postType.slice(0, 1).toUpperCase() + postType.slice(1)}s:</h2>
+                                        <ul class="link-list min-list">
+                                            ${results[postType].map(item => {
+                                                return (
+                                                    `
+                                                    ${postType === 'professor'
+                                                    ?
+                                                    `
+                                                    <li class="professor-card__list-item">
+                                                        <a class="professor-card" href="${item.permalink}">
+                                                            <img src="${item.image}" class="professor-card__image">
+                                                            <span class="professor-card__name">${item.title}</span>
+                                                        </a>
+                                                    </li>
+                                                    `
+                                                    :
+                                                    postType === 'event'
+                                                    ?
+                                                    `
+                                                    <div class="event-summary">
+                                                        <a class="event-summary__date t-center" href="${item.permalink}">
+                                                            <span class="event-summary__month">${item.month}</span>
+                                                            <span class="event-summary__day">${item.day}</span>  
+                                                        </a>
+                                                        <div class="event-summary__content">
+                                                            <h5 class="event-summary__title headline headline--tiny"><a href="${item.permalink}">${item.title}</a></h5>
+                                                            <p>${item.description} <a href="${item.permalink}" class="nu gray">Learn more &raquo;</a></p>
+                                                        </div>
+                                                    </div>
+                                                    `
+                                                    :
+                                                    `
+                                                    <li>
+                                                        <a href="${item.permalink}">${item.title}</a>
+                                                        ${postType == 'post' ? `by ${item.authorName}` : ''}
+                                                    </li>
+                                                    `
+                                                    }
+                                                    `
+                                                )
+                                            }).join('')}
+                                        </ul>
+                                    </div>
+                                    ${i % 3 === 2 || i === postTypes.length - 1 ? `</div>` : ''}
+                                    `
+                                )
+                            }).join('')}
                         `
                         :
                         `
-                        <p>No search results for "${this.searchValue}"</p>
+                        <h2 class="search-overlay__section-title">No search results for "${this.searchValue}".</h2>
                         `
                     }
                 `);
             }, () => {
                 this.isSpinnerVisible = false;
                 this.resultsOutput.html('Unexpected error. Please try again');
-            })
+            });
     }
 }
 

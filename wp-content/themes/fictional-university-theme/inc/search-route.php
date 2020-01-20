@@ -25,6 +25,36 @@ function universitySearchResults($data) {
         array_push($results[$postType], infoArr($postType, $eventDate));
     }
 
+    // custom queries
+
+    if( !$results['program'] ) return $results;
+    
+    $programMetaQuery = array( 'relation' => 'OR' );
+
+    foreach ($results['program'] as $program) {
+        array_push($programMetaQuery, array(
+            'key' => 'related_programs',
+            'compare' => 'LIKE',
+            'value' => '' . $program['id'] . '"'
+        ));
+    }
+
+    $programRelationshipQuery = new WP_Query( array(
+        'post_type' => 'professor',
+        'meta_query' => $programMetaQuery
+    ) );
+
+    while( $programRelationshipQuery->have_posts() ) {
+        $programRelationshipQuery->the_post();
+        $postType = get_post_type();
+        if( !$results[$postType] ) $results[$postType] = array();
+        array_push($results[$postType], infoArr($postType, null));
+        // remove duplicate results
+        $results[$postType] = array_unique( $results[$postType], SORT_REGULAR );
+    }
+
+    wp_reset_postdata();
+
     return $results;
 }
 

@@ -32,7 +32,7 @@ function university_post_types() {
             'all_items' => 'All Programs'
         ),
         'menu_icon' => 'dashicons-awards',
-        'supports' => array( 'title', 'editor' )
+        'supports' => array( 'title' )
     ) );
 
     // Professor Post Type

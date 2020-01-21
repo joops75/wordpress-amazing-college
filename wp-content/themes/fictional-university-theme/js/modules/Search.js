@@ -48,6 +48,7 @@ class Search {
         $('body').addClass('body-no-scroll'); // triggers the 'overflow: hidden' property to disable scrolling
         this.isOverlayOpen = true;
         setTimeout(() => this.searchInput.focus(), 301);
+        return false; // prevents default navigational behaviour of anchor tags (when javascript is enabled)
     }
 
     closeOverlay() {

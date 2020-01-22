@@ -85,3 +85,46 @@ function university_adjust_queries($query) {
 }
 
 add_action( 'pre_get_posts', 'university_adjust_queries' );
+
+// redirect subscriber accounts out of admin and onto front page
+function redirectSubsToFrontend() {
+    $currentUser = wp_get_current_user();
+    if( count( $currentUser->roles ) == 1 and $currentUser->roles[0] == 'subscriber' ) {
+        wp_redirect( site_url( '/' ) );
+        exit; // tells php to stop after redirect
+    }
+}
+
+add_action( 'admin_init', 'redirectSubsToFrontend' );
+
+// remove admin bar for subscribers
+function noSubsAdminBar() {
+    $currentUser = wp_get_current_user();
+    if( count( $currentUser->roles ) == 1 and $currentUser->roles[0] == 'subscriber' ) {
+        show_admin_bar( false );
+    }
+}
+
+add_action( 'wp_loaded', 'noSubsAdminBar' );
+
+// customize login image href url
+function headerUrl() {
+    return esc_url( site_url( '/' ) );
+}
+
+add_action( 'login_headerurl', 'headerUrl' );
+
+// allow main stylesheet to be used in login area
+function loginCSS() {
+    wp_enqueue_style('google_fonts', '//fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,400,400i,700,700i|Roboto:100,300,400,400i,700,700i');
+    wp_enqueue_style('random_name', get_stylesheet_uri(), null, microtime());
+}
+
+add_action( 'login_enqueue_scripts', 'loginCSS' );
+
+// customise login screen title
+function loginTitle() {
+    return get_bloginfo( 'name' );
+}
+
+add_action( 'login_headertitle', 'loginTitle' );

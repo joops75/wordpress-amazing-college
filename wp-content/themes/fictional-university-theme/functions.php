@@ -6,6 +6,10 @@ function university_custom_rest() {
     register_rest_field( 'post', 'authorName', array(
         'get_callback' => function() { return get_the_author(); }
     ));
+    
+    register_rest_field( 'note', 'userNoteCount', array(
+        'get_callback' => function() { return count_user_posts( get_current_user_id(), 'note' ); }
+    ));
 }
 
 add_action('rest_api_init', 'university_custom_rest');
@@ -37,7 +41,8 @@ function university_files() {
     wp_enqueue_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
     wp_enqueue_style('random_name', get_stylesheet_uri(), null, microtime());
     wp_localize_script('university_js', 'universityData', array( // must use an existing script handle
-        'root_url' => get_site_url()
+        'root_url' => get_site_url(),
+        'nonce' => wp_create_nonce( 'wp_rest' ) // used for authentication on front end
     ));
 }
 
@@ -128,3 +133,25 @@ function loginTitle() {
 }
 
 add_action( 'login_headertitle', 'loginTitle' );
+
+// amend note attributes before saving to the database
+function customizeNote($data, $postArr) {
+    if( $data['post_type'] === 'note') {
+        // limit user note count
+        if( count_user_posts( get_current_user_id(), 'note' ) >= 5 and !$postArr['ID'] ) { // if the post has no ID then it is being created
+            die( "You have reached your note limit. Delete a note before creating another." ); // prevents all subsequent code from running and returns an error on front end
+        }
+
+        // escape input fields' html tags
+        $data['post_title'] = sanitize_text_field( $data['post_title'] );
+        $data['post_content'] = sanitize_textarea_field( $data['post_content'] );
+
+        // make all notes that aren't being deleted private
+        if( $data['post_status'] !== 'trash' ) {
+            $data['post_status'] = 'private';
+        }
+    }
+    return $data;
+}
+
+add_filter( 'wp_insert_post_data', 'customizeNote', 10, 2 );

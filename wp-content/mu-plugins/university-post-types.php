@@ -50,6 +50,24 @@ function university_post_types() {
         'menu_icon' => 'dashicons-welcome-learn-more',
         'supports' => array( 'title', 'editor', 'thumbnail' )
     ) );
+
+    // Note Post Type
+    register_post_type( 'note', array(
+        'capability_type' => 'note', // value doesn't need to match post type name
+        'map_meta_cap' => true, // enforces permissions defined under 'note' capability_type in backend at the right time/place
+        'show_in_rest' => true, // make data available in default rest api at /wp-json/wp/v2/note
+        'public' => false, // don't want note post to show up in public queries or search results
+        'show_ui' => true, // show post type in admin dashboard
+        'labels' => array(
+            'name' => 'Notes',
+            'singular_name' => 'Note',
+            'add_new_item' => 'Add New Note',
+            'edit_item' => 'Edit Note',
+            'all_items' => 'All Notes'
+        ),
+        'menu_icon' => 'dashicons-welcome-write-blog',
+        'supports' => array( 'title', 'editor' )
+    ) );
 }
 
 add_action( 'init', 'university_post_types' );

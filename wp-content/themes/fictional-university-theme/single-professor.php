@@ -2,6 +2,34 @@
     get_header();
     while( have_posts() ) : the_post();
     pageBanner();
+    $allLikedPosts = new WP_Query( array(
+        'post_type' => 'like',
+        'meta_query' => array(
+            array(
+                'key' => 'liked_professor_id',
+                'compare' => '=',
+                'value' => get_the_ID()
+            )
+        )
+    ) );
+    
+    $doesUserLikeThisPost = 'no';
+    if( is_user_logged_in() ) {
+        $userLikedPosts = new WP_Query( array(
+            'author' => get_current_user_id(), // Get_current_user_id returns 0 if user logged out, which effectively negates this line and so the query will run as if it wasn't present. Therefore, is_user_logged_in check is required
+            'post_type' => 'like',
+            'meta_query' => array(
+                array(
+                    'key' => 'liked_professor_id',
+                    'compare' => '=',
+                    'value' => get_the_ID()
+                )
+            )
+        ) );
+        if( $userLikedPosts->found_posts ) {
+            $doesUserLikeThisPost = 'yes';
+        }
+    }
 ?>
 
     <div class="container container--narrow page-section">
@@ -11,6 +39,11 @@
                     <?php the_post_thumbnail('professor-portrait'); ?>
                 </div>
                 <div class="two-thirds">
+                    <span class="like_box" data-exists="<?php echo $doesUserLikeThisPost; ?>" data-prof_id="<?php the_ID(); ?>" data-like_id="<?php echo $userLikedPosts->posts[0]->ID; ?>">
+                        <i class="fa fa-heart-o" aria-hidden="true"></i>
+                        <i class="fa fa-heart" aria-hidden="true"></i>
+                        <span class="like-count"><?php echo $allLikedPosts->found_posts; ?></span>
+                    </span>
                     <?php the_content(); ?>
                 </div>
             </div>

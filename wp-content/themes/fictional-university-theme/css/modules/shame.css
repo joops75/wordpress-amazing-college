@@ -104,24 +104,24 @@
   opacity: .65;
 }
 
-.social-icons-list {
+.social_icons_list {
   display: flex;
   margin: 0 -8px;
 }
 
-.social-icons-list li {
+.social_icons_list li {
   flex: 1;
   margin: 0 8px;
 }
 
-.social-icons-list li a {
+.social_icons_list li a {
   display: block;
   text-align: center;
   color: #FFF;
   font-size: 1.25rem;
 }
 
-.social-icons-list li a:hover {
+.social_icons_list li a:hover {
   opacity: .75;
 }
 
@@ -243,7 +243,7 @@
 }
 
 /* Like Box */
-.generic-content .like-box {
+.generic-content .like_box {
   float: right;
   font-size: 1rem;
   background-color: #EDEDED;
@@ -256,7 +256,7 @@
   position: relative;
 }
 
-.generic-content .like-box:hover {
+.generic-content .like_box:hover {
   background-color: #DEDEDE;
 }
 
@@ -264,13 +264,13 @@
   padding-left: 10px;
 }
 
-.like-box .fa-heart-o {
+.like_box .fa-heart-o {
   transition: all .35s ease-out;
   position: absolute;
   left: 10px;
 }
 
-.like-box .fa-heart {
+.like_box .fa-heart {
   left: 10px;
   transition: all .4s ease-out;
   position: absolute;
@@ -279,13 +279,13 @@
   opacity: 0;
 }
 
-.like-box[data-exists="yes"] .fa-heart {
+.like_box[data-exists="yes"] .fa-heart {
   transform: scale(1);
   visibility: visible;
   opacity: 1;
 }
 
-.like-box[data-exists="yes"] .fa-heart-o {
+.like_box[data-exists="yes"] .fa-heart-o {
   visibility: hidden;
   opacity: 0;
 }

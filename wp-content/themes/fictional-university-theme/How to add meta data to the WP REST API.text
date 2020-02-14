@@ -1,0 +1,75 @@
+To add meta data to the REST API, see https://developer.wordpress.org/rest-api/extending-the-rest-api/modifying-responses/
+
+Example: how to add a 'subtitle' meta key to the 'note' custom post type in the REST API.
+
+1. Add the 'subtitle' meta key to the 'note' custom post type in the admin area via the ACF plugin.
+
+2. Enable custom-fields support so meta fields can appear in the REST API.
+In wp-content/mu-plugins/university-post-types.php:
+register_post_type( 'note', array(
+    // other attributes here
+    'show_in_rest' => true,
+    'supports' => array( 'title', 'editor', 'custom-fields' )
+) );
+
+3. Add specific meta data to the responses of default endpoints in the REST API.
+In wp-content/themes/fictional-university-theme/functions.php:
+register_meta('post', 'subtitle', [
+    'object_subtype' => 'note', // restrict the usage of the 'subtitle' meta key to the 'note' post type in the REST API
+    'show_in_rest' => true,
+    'type'      => 'string', // Validate and sanitize the meta value as a string. Default: 'string'.
+    'description'    => 'A meta key associated with a string meta value.', // Shown in the schema for the meta key.
+    'single'        => true, // Return a single value of the type. Default: false.
+]);
+
+4. Enable capture of meta fields received from the frontend javascript client. This is necessary because meta fields are NOT received by the wp_insert_post_data filter.
+In wp-content/themes/fictional-university-theme/functions.php:
+function insert_note_meta($post, $request) {
+    $postId = wp_update_post( array(
+        'ID'    => $post->ID,
+        'meta_input' => array(
+            'subtitle' => sanitize_text_field( $request['subtitle'] )
+        )
+    ) );
+
+    if ( false === $postId ) {
+        return new WP_Error(
+            'rest_note_subtitle_failed',
+            __( 'Failed to update note subtitle.' ),
+            array( 'status' => 500 )
+        );
+    }
+
+    return true;
+}
+
+add_action( 'rest_after_insert_note', 'insert_note_meta', 11, 2 ); // 'rest_after_insert_' . 'post_type_here'
+
+5. Add HTML markup for field in php file.
+In wp-content/themes/fictional-university-theme/page-my-notes.php:
+For creation:
+<input type="text" class="new-note-subtitle" placeholder="Subtitle">
+For editing:
+<input readonly class="note-subtitle-field" type="text" value="<?php echo esc_attr( get_field( 'subtitle' ) ); ?>">
+
+6. Add CSS for HTML markup in wp-content/themes/fictional-university-theme/css/modules/my-notes.css.
+
+7. Send in meta fields via data object in frontend javascript client via custom keys e.g. 'subtitle'
+In wp-content/themes/fictional-university-theme/js/modules/MyNotes.js:
+For creation:
+const data = {
+        'title': $('.new-note-title').val(),
+        'subtitle': $('.new-note-subtitle').val(),
+        'content': $('.new-note-body').val(),
+        'status': 'publish'
+};
+For editing:
+const data = {
+    'title': note.children('.note-title-field').val(),
+    'subtitle': note.children('.note-subtitle-field').val(), // meta field
+    'content': note.children('.note-body-field').val()
+};
+
+8. Receive meta fields on frontend in AJAX response via the res.meta object e.g. res.meta.subtitle
+In wp-content/themes/fictional-university-theme/js/modules/MyNotes.js:
+note.children('.note-subtitle-field').val(res.meta.subtitle);

@@ -16,6 +16,7 @@ class MyNotes {
     createNote(e) {
         const data = {
             'title': $('.new-note-title').val(),
+            'subtitle': $('.new-note-subtitle').val(),
             'content': $('.new-note-body').val(),
             'status': 'publish' // omitting field creates draft post, setting to 'publish' makes post available to everyone
         };
@@ -26,11 +27,12 @@ class MyNotes {
             method: 'POST',
             data,
             success: res => {
-                $('.new-note-title, .new-note-body').val('');
+                $('.new-note-title, .new-note-subtitle, .new-note-body').val('');
                 $('#my-notes').hide().slideDown().prepend(`
                     <li data-id="${res.id}">
                         <input readonly class="note-title-field" type="text" value="${res.title.raw}">
                         <span class="edit-note"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</span>
+                        <input readonly class="note-subtitle-field" type="text" value="${res.meta.subtitle}">
                         <span class="delete-note"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</span>
                         <textarea readonly class="note-body-field">${res.content.raw}</textarea>
                         <span class="update-note btn btn--blue btn--small"><i class="fa fa-arrow-right" aria-hidden="true"></i> Save</span>
@@ -74,6 +76,7 @@ class MyNotes {
         const note = $(e.target).parents('li');
         const data = {
             'title': note.children('.note-title-field').val(),
+            'subtitle': note.children('.note-subtitle-field').val(),
             'content': note.children('.note-body-field').val()
         };
         
@@ -83,9 +86,12 @@ class MyNotes {
             method: 'POST',
             data,
             success: res => {
-                this.makeNoteReadOnly(note);
                 console.log('success');
                 console.log(res);
+                this.makeNoteReadOnly(note);
+                note.children('.note-title-field').val(res.title.raw);
+                note.children('.note-subtitle-field').val(res.meta.subtitle);
+                note.children('.note-body-field').val(res.content.raw);
             },
             error: res => {
                 console.log('error');
@@ -105,14 +111,14 @@ class MyNotes {
 
     makeNoteEditable(note) {
         note.find('.edit-note').html('<i class="fa fa-times" aria-hidden="true"></i> Cancel');
-        note.find('.note-title-field, .note-body-field').removeAttr('readonly').addClass('note-active-field');
+        note.find('.note-title-field, .note-subtitle-field, .note-body-field').removeAttr('readonly').addClass('note-active-field');
         note.find('.update-note').addClass('update-note--visible');
         note.data('state', 'editable');
     }
 
     makeNoteReadOnly(note) {
         note.find('.edit-note').html('<i class="fa fa-pencil" aria-hidden="true"></i> Edit');
-        note.find('.note-title-field, .note-body-field').attr('readonly', true).removeClass('note-active-field');
+        note.find('.note-title-field, .note-subtitle-field, .note-body-field').attr('readonly', true).removeClass('note-active-field');
         note.find('.update-note').removeClass('update-note--visible');
         note.data('state', 'readonly');
     }

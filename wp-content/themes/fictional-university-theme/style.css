@@ -1112,7 +1112,7 @@ body.login {
   visibility: visible;
 }
 
-.note-title-field {
+.note-title-field, .note-subtitle-field {
   width: 40%;
   font-size: 1.85rem;
   font-family: 'Roboto Condensed', sans-serif;
@@ -1127,18 +1127,22 @@ body.login {
 
 @media (max-width: 400px) {
 
-.note-title-field {
+.note-title-field, .note-subtitle-field {
     width: 100%
 }
   }
 
 @media (min-width: 635px) {
 
-.note-title-field {
+.note-title-field, .note-subtitle-field {
     width: 65%;
     font-size: 3.125rem
 }
   }
+
+.note-subtitle-field {
+  font-size: 1.5rem;
+}
 
 .note-body-field {
   color: #333;
@@ -1188,7 +1192,7 @@ body.login {
   margin-bottom: 20px;
 }
 
-.new-note-title {
+.new-note-title, .new-note-subtitle {
   width: 100%;
   padding: 10px;
   font-family: 'Roboto', sans-serif;

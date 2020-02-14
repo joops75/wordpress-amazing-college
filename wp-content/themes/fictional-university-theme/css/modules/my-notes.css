@@ -45,7 +45,7 @@
   visibility: visible;
 }
 
-.note-title-field {
+.note-title-field, .note-subtitle-field {
   width: 40%;
   font-size: 1.85rem;
   font-family: 'Roboto Condensed', sans-serif;
@@ -65,6 +65,10 @@
     width: 65%;
     font-size: 3.125rem;
   }
+}
+
+.note-subtitle-field {
+  font-size: 1.5rem;
 }
 
 .note-body-field {
@@ -103,7 +107,7 @@
   margin-bottom: 20px;
 }
 
-.new-note-title {
+.new-note-title, .new-note-subtitle {
   width: 100%;
   padding: 10px;
   font-family: 'Roboto', sans-serif;

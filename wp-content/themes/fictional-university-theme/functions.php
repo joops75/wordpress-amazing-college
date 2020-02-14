@@ -11,6 +11,14 @@ function university_custom_rest() {
     register_rest_field( 'note', 'userNoteCount', array(
         'get_callback' => function() { return count_user_posts( get_current_user_id(), 'note' ); }
     ));
+
+    register_meta('post', 'subtitle', [
+        'object_subtype' => 'note', // restrict the usage of the 'subtitle' meta key to the 'note' post type in the rest api
+        'show_in_rest' => true,
+        'type'      => 'string', // Validate and sanitize the meta value as a string. Default: 'string'.
+        'description'    => 'A meta key associated with a string meta value.', // Shown in the schema for the meta key.
+        'single'        => true, // Return a single value of the type. Default: false.
+    ]);
 }
 
 add_action('rest_api_init', 'university_custom_rest');
@@ -136,7 +144,7 @@ function loginTitle() {
 add_action( 'login_headertitle', 'loginTitle' );
 
 // amend note attributes before saving to the database
-function customizeNote($data, $postArr) {
+function customizeNote($data, $postArr) { // meta data is NOT passed in here
     if( $data['post_type'] === 'note') {
         // limit user note count
         if( count_user_posts( get_current_user_id(), 'note' ) >= 5 and !$postArr['ID'] ) { // if the post has no ID then it is being created
@@ -155,4 +163,25 @@ function customizeNote($data, $postArr) {
     return $data;
 }
 
-add_filter( 'wp_insert_post_data', 'customizeNote', 10, 2 );
+add_filter( 'wp_insert_post_data', 'customizeNote', 10, 2 ); // fires on creation and updating
+
+function insert_note_meta($post, $request, $creating) { // meta data IS passed in here, fires after a single post is completely created or updated via the REST API
+    $postId = wp_update_post( array(
+        'ID'    => $post->ID,
+        'meta_input' => array(
+            'subtitle' => sanitize_text_field( $request['subtitle'] )
+        )
+    ) );
+
+    if ( false === $postId ) {
+        return new WP_Error(
+            'rest_note_subtitle_failed',
+            __( 'Failed to update note subtitle.' ),
+            array( 'status' => 500 )
+        );
+    }
+
+    return true;
+}
+
+add_action( 'rest_after_insert_note', 'insert_note_meta', 11, 3 ); // 'rest_after_insert_' . 'post_type_here'

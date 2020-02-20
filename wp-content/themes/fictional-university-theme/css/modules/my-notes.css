@@ -1,4 +1,8 @@
 /* My Notes */
+.create-note input[type=file], #my-notes input[type=file] {
+  font-size: 1.2rem;
+}
+
 .edit-note,
 .delete-note,
 .submit-note {
@@ -83,6 +87,10 @@
   border: 1px solid transparent;
   height: 175px;
   outline: none;
+}
+
+.note-image-area img {
+  display: block;
 }
 
 .note-active-field {

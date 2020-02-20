@@ -11,6 +11,18 @@ function university_custom_rest() {
     register_rest_field( 'note', 'userNoteCount', array(
         'get_callback' => function() { return count_user_posts( get_current_user_id(), 'note' ); }
     ));
+    
+    register_rest_field( 'note', 'thumbnail_url', array(
+        'get_callback' => function() {
+            return get_the_post_thumbnail_url( 0, [150, 150] );
+        }
+    ));
+    
+    register_rest_field( 'note', 'thumbnail_caption', array(
+        'get_callback' => function() {
+            return get_the_post_thumbnail_caption();
+        }
+    ));
 
     register_meta('post', 'subtitle', [
         'object_subtype' => 'note', // restrict the usage of the 'subtitle' meta key to the 'note' post type in the rest api
@@ -181,7 +193,57 @@ function insert_note_meta($post, $request, $creating) { // meta data IS passed i
         );
     }
 
+    // Check uploaded file is present and an image and prevent db saving if not
+    $type = $_FILES['image']['type']; // 'image' is the name of the image key on the frontend
+    if ( !preg_match( '#^image#', $type ) ) {
+        return true;
+    }
+
+    // Handle thumbnail images
+    // See https://developer.wordpress.org/reference/functions/media_handle_upload/ for file uploading code
+    // These files need to be included as dependencies when on the front end.
+    require_once( ABSPATH . 'wp-admin/includes/image.php' );
+    require_once( ABSPATH . 'wp-admin/includes/file.php' );
+    require_once( ABSPATH . 'wp-admin/includes/media.php' );
+
+    // Let WordPress handle the upload.
+    $username = wp_get_current_user()->user_login; // or user_nicename, display_name
+    $image_name = $_FILES['image']['name']; // Remember, 'image' is the name of the image key on the frontend
+    $ext  = pathinfo( $image_name, PATHINFO_EXTENSION );
+    $image_name = wp_basename( $image_name, ".$ext" );
+    $new_thumbnail_id = media_handle_upload( 'image', $post->ID, array( // Remember, 'image' is the name of the image key on the frontend
+        // set the image description
+        'post_content' => "note image uploaded by $username",
+        // set the image caption
+        'post_excerpt' => "$image_name by $username"
+        // note: can't set alternative text!
+    ) );
+    if ( is_wp_error( $new_thumbnail_id ) ) {
+        wp_die( $new_thumbnail_id );
+    } else {
+        // remove old thumbnail image (if any) from media storage
+        $old_thumbnail_id = get_post_thumbnail_id( $post->ID );
+        if( $old_thumbnail_id ) {
+            wp_delete_attachment( $old_thumbnail_id );
+        }
+        // assign new image to post thumbnail
+        set_post_thumbnail( $post->ID, $new_thumbnail_id );
+    }
+
     return true;
 }
 
 add_action( 'rest_after_insert_note', 'insert_note_meta', 11, 3 ); // 'rest_after_insert_' . 'post_type_here'
+
+function remove_attached_media_on_permanently_delete_note( $postId ) {
+    // We check if the global post type isn't ours and just return
+    global $post_type;
+    if ( $post_type != 'note' ) return; // could alternatively use get_post_type( $postId ) != 'note
+
+    $thumbnail_id = get_post_thumbnail_id( $postId );
+    if( $thumbnail_id ) {
+        wp_delete_attachment( $thumbnail_id );
+    }
+}
+
+add_action( 'before_delete_post', 'remove_attached_media_on_permanently_delete_note' ); // Runs only when a WordPress user manually empties the trash. Therefore any attached media will be left orphaned if automatic scheduled trash emptying takes place.

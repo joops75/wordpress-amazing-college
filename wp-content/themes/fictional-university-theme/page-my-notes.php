@@ -13,6 +13,7 @@
             <input type="text" class="new-note-title" placeholder="Title">
             <input type="text" class="new-note-subtitle" placeholder="Subtitle">
             <textarea class="new-note-body" placeholder="Your note here..."></textarea>
+            <input type="file" accept="image/*" class="new-note-image">
             <span class="submit-note">Create Note</span>
             <span class="note-limit-message"></span>
         </div>
@@ -32,7 +33,11 @@
                 <span class="delete-note"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</span>
                 <input readonly class="note-subtitle-field" type="text" value="<?php echo esc_attr( get_field( 'subtitle' ) ); ?>">
                 <textarea readonly class="note-body-field"><?php echo esc_textarea( get_the_content() ); ?></textarea>
-                <span class="update-note btn btn--blue btn--small"><i class="fa fa-arrow-right" aria-hidden="true"></i> Save</span>
+                <div class="note-image-area">
+                    <img src="<?php echo get_the_post_thumbnail_url( 0, [150, 150] ); ?>" alt="<?php echo get_the_post_thumbnail_caption(); ?>">
+                    <input type="file" accept="image/*" class="note-image-field update-note">
+                </div>
+                <span class="update-note btn btn--blue btn--small submit-update"><i class="fa fa-arrow-right" aria-hidden="true"></i> Save</span>
             </li>
         <?php
             endwhile;

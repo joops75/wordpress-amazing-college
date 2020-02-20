@@ -66,7 +66,7 @@ function university_post_types() {
             'all_items' => 'All Notes'
         ),
         'menu_icon' => 'dashicons-welcome-write-blog',
-        'supports' => array( 'title', 'editor', 'custom-fields' ) // For meta fields registered on custom post types, the post type must have custom-fields support. Otherwise the meta fields will not appear in the REST API.
+        'supports' => array( 'title', 'editor', 'custom-fields', 'thumbnail' ) // For meta fields registered on custom post types, the post type must have custom-fields support. Otherwise the meta fields will not appear in the REST API.
     ) );
 
     // Like Post Type
